@@ -1,0 +1,43 @@
+********************************************* 
+AVA: cursos.alura.com.br
+Formação: 
+Curso: Node.js e JWT: autenticação com tokens
+Data Início: 09/04/2021
+*********************************************
+
+Capítulo 01: Protegendo as senhas no banco de dados
+#hashing, #bcrypt  
+
+1. Baixamos o pacote da aplicação incial em:
+        >https://github.com/alura-cursos/blog-do-codigo/archive/aula-0.zip
+
+2. Descompactamos e executamos o:
+        >npm install 
+   ...no diretório do projeto
+
+3. Executamos o projeto:
+        >npm start 
+   ...e fizemos algumas requisições CRUD para testar
+
+4. Instalamos a versão 3 do dcrypt:
+        >npm install bcrypt@3.0.8
+
+5. Acrescentamos a função gerarSenhaHash() em:
+        @see src\usuarios\usuarios-modelo.js
+   ...usando-a em um método adicionaSenha() para substituir a atribuição "tradicional" da senha,
+   movendo a validação da senha para este método:
+        @see src\usuarios\usuarios-modelo.js
+
+6. Trocamos as propriedades do modelo, o DAO e as colunas do Usuário de "senha" para "senhaHash":
+        @see src\usuarios\usuarios-modelo.js
+        @see src\usuarios\usuarios-dao.js
+        @see database.js
+7. Usamos o método adicionaSenha() do modelo no controlador do usuário:
+        @see src\usuarios\usuarios-controlador.js
+   Tivemos que apagar a Base "db.sqlite" para que pudesse ser reconstruida com as novas definições
+   em: 
+        @see database.js
+
+Capítulo 02: Criando um sistema de login escalável
+
+1.
