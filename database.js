@@ -23,10 +23,11 @@ db.serialize(() => {
   db.run(POSTS_SCHEMA);
   db.run(USUARIOS_SCHEMA);
 
+  /*
   db.each('SELECT * FROM usuarios', (err, usuario) => {
     console.log('Usuarios: ');
     console.log(usuario);
-  });
+  });*/
 });
 
 process.on('SIGINT', () =>

@@ -2,6 +2,10 @@ const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 
 module.exports = {
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
   adiciona: async (req, res) => {
     const { nome, email, senha } = req.body;
 
@@ -31,11 +35,27 @@ module.exports = {
     }
   },
 
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
+  login: (req, res) => {
+    res.status(204).send();
+  },
+
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
   lista: async (req, res) => {
     const usuarios = await Usuario.lista();
     res.json(usuarios);
   },
 
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
   deleta: async (req, res) => {
     const usuario = await Usuario.buscaPorId(req.params.id);
     try {

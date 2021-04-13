@@ -39,5 +39,20 @@ Capítulo 01: Protegendo as senhas no banco de dados
         @see database.js
 
 Capítulo 02: Criando um sistema de login escalável
+#passport, #LocalStrategy, #nonSessionAuth
 
-1.
+1. Instalamos os pacotes:
+        >npm install passport@0.4.1
+        >npm install passport-local@1.0.0
+2. Criamos e estratégia de autenticação usando passport como Middleware:
+        @see src\usuarios\estrategias-autenticacao.js
+   ...exportando-a no barril da pasta usuarios:
+        @see src\usuarios\index.js
+3. Audicionamos o controlador de login de usuários:
+        @see src\usuarios\usuarios-controlador.js
+4. Criamos a rota de login:
+        @see src\usuarios\usuarios-rotas.js
+
+Capítulo 03: Implementando autenticação com JWT
+
+1. 
