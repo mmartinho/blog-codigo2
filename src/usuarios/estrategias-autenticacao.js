@@ -1,6 +1,8 @@
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
+const BearerStrategy = require('passport-http-bearer').Strategy;
+const jwt = require('jsonwebtoken');
 
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
@@ -29,12 +31,12 @@ async function verificaSenha(senha, senhaHash) {
 /** 
  * Middleware: Estrategia de consulta de credenciais de usuário 
  */
-passport.use(
-    new LocalStrategy({
+passport.use(new LocalStrategy({
         usernameField : 'email',
         passwordField : 'senha',
         session: false
-    }, async (email, senha, done) => {
+    }, 
+    async (email, senha, done) => {
         try {
             const usuario = await Usuario.buscaPorEmail(email); 
             verificaUsuario(usuario);
@@ -44,5 +46,20 @@ passport.use(
         } catch (error) {
             done(error);
         }
-    })
-);
+    }
+));
+
+/**
+ * Middleware: Estratégia de verificação do token
+ */
+passport.use(new BearerStrategy(
+    async (token, done) => {
+        try {
+            const payload = jwt.verify(token, process.env.CHAVE_JWT);
+            const usuario = await Usuario.buscaPorId(payload.id);
+            done(null, usuario);                
+        } catch (error) {
+            done(error);
+        }
+    }
+));

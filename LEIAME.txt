@@ -54,5 +54,38 @@ Capítulo 02: Criando um sistema de login escalável
         @see src\usuarios\usuarios-rotas.js
 
 Capítulo 03: Implementando autenticação com JWT
+#jwt, #webToken, #payload
 
-1. 
+1. Instalamos o pacote do JWT:
+        >npm install jsonwebtoken@8.5.1
+2. Adcionamos uma função para criar o token:
+        @see src\usuarios\usuarios-controlador.js
+   ...usando-a na função de login;
+3. Executamos o seguinte comando para gerar uma senha secreta pra nossa função:
+        >node -e "console.log(require('crypto').randomBytes(256).toString('base64'))"
+4. Criamos um novo arquivo:
+        @see .env
+   ...colocando o resultado da chave gerada pelo comando anterior.
+5. Instalamos o pacote dotenv:
+        >npm install dotenv@8.2.0
+   ...chamando-o em:
+        @see server.js
+6. Para usar na função a variável do arquivo que criamos anteriormente:
+        @see src\usuarios\usuarios-controlador.js
+   ...nos certificando que o .env esteja no .gitignore do projeto
+7. Agora precisamos da estratégia de autenticação:
+        >npm install passport-http-bearer@1.0.1
+8. Adicionamos a estratégia de verificação de token no Middleware:
+        @see src\usuarios\estrategias-autenticacao.js
+   ...utilizando-a nas rotas:
+        @see src\posts\posts-rotas.js
+        @see src\usuarios\usuarios-rotas.js
+9. Customizamos a estratégia Middleware de autenticação local:
+        @see src\usuarios\middlewares-autenticacao.js
+10. Customizamos a estratégia Middleware de autenticação bearer:
+        @see src\usuarios\middlewares-autenticacao.js
+
+Capítulo 04: Implementando o logout com tokens
+
+1.
+
