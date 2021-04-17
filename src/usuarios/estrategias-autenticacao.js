@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
+const blacklist = require('../../redis/manipula-blaklist');
 
 
 /**
@@ -28,6 +29,17 @@ async function verificaSenha(senha, senhaHash) {
     }
 }
 
+/**
+ * Verica se o token já está na lista de descartados
+ * @param {*} token 
+ */
+async function verificaTokenNaBlacklist(token) {
+    const tokenNaBlacklist = await blacklist.contemToken(token);
+    if(tokenNaBlacklist) {
+        throw new jwt.JsonWebTokenError('Token inválido por logout');
+    }
+}
+
 /** 
  * Middleware: Estrategia de consulta de credenciais de usuário 
  */
@@ -40,8 +52,8 @@ passport.use(new LocalStrategy({
         try {
             const usuario = await Usuario.buscaPorEmail(email); 
             verificaUsuario(usuario);
-            console.log(usuario);
             await verificaSenha(senha, usuario.senha);
+            /** repassa o usuário pro próximo middleware */
             done(null, usuario);   
         } catch (error) {
             done(error);
@@ -55,9 +67,11 @@ passport.use(new LocalStrategy({
 passport.use(new BearerStrategy(
     async (token, done) => {
         try {
+            await verificaTokenNaBlacklist(token);
             const payload = jwt.verify(token, process.env.CHAVE_JWT);
             const usuario = await Usuario.buscaPorId(payload.id);
-            done(null, usuario);                
+            /** repassa o usuário e o token pra pro próximo middleware */
+            done(null, usuario, { token : token });                 
         } catch (error) {
             done(error);
         }

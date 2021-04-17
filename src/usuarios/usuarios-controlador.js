@@ -1,6 +1,7 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 const jwt = require('jsonwebtoken');
+const blacklist = require('../../redis/manipula-blaklist');
 
 /**
  * @param {*} usuario 
@@ -10,8 +11,7 @@ function criaTokenJWT(usuario) {
   const payload = {
     id: usuario.id
   };
-
-  const token = jwt.sign(payload, process.env.CHAVE_JWT);
+  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
   return token;
 }
 
@@ -57,6 +57,24 @@ module.exports = {
     const token = criaTokenJWT(req.user);
     res.set('Authorization', token);
     res.status(204).send();
+  },
+
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
+  logout: async (req, res) => {
+    try {
+      /**
+       * Pega o token a partir do middleware anterior
+       * @see src\usuarios\middlewares-autenticacao.js
+       */
+      const token = req.token;
+      await blacklist.adiciona(token);
+      res.status(204).send();      
+    } catch (error) {
+      res.status(500).send({erro : error.message});
+    }
   },
 
   /**
