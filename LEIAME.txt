@@ -5,6 +5,18 @@ Curso: Node.js: Refresh Tokens e confirmação de cadastro
 Data Início: 19/04/2021
 ********************************************************
 
-Capítulo 01: autenticação co refresh tokens  
+Capítulo 01: autenticação com refresh tokens  
+#arrowFunction, #blackList, #whiteList, #blockList, #allowList, #opaqueToken, #refreshToken
 
-1. 
+1. Alteramos a sintaxe de "arrow function" para função js tradicional em:
+        @see src\usuarios\usuarios-controlador.js
+        @see src\usuarios\usuarios-dao.js
+2. Promissificamos as funções do DAO em:
+        @see src\usuarios\usuarios-dao.js
+3. Acrescentamos a nova função opaqueToken() para de geração do refreshToken:
+        @see src\usuarios\usuarios-controlador.js
+   ...utilizando-a no controlador de login do usuário
+4. Instalamos a lib "moment" para lidar com a expiração do refreshToken:
+        >npm install moment@2.26.0
+   ...utilizando-a na funçao criarTokenOpaco():
+        @see src\usuarios\usuarios-controlador.js
