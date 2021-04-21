@@ -1,10 +1,42 @@
 const passport = require('passport');
+const { InvalidArgumentError } = require('../erros');
+const Usuario = require('./usuarios-modelo');
+const allowListRefreshToken = require('../../redis/allowlist-refresh-token');
+
+/**
+ * @param {*} refreshToken 
+ * @returns 
+ */
+async function verificaRefreshToken(refreshToken) {
+    if(!refreshToken){
+        throw new InvalidArgumentError('Refresh não enviado');
+    }
+    const id = await allowListRefreshToken.buscaValor(refreshToken);
+    if(!id) {
+        throw new InvalidArgumentError('Refresh token inválido');
+    }
+    return id;
+}
+
+/**
+ * 
+ * @param {*} refreshToken 
+ */
+async function invalidaRefreshToken(refreshToken) {
+    await allowListRefreshToken.deleta(refreshToken);        
+}
 
 /**
  * Extendendo as estratégias do passport
  */
 module.exports = {
-    local : (req, res, next) => {
+    /**
+     * Middleware: Autenticação local de usuário
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    local (req, res, next) {
         passport.authenticate(
             'local', 
             {session: false}, 
@@ -28,7 +60,13 @@ module.exports = {
             }
         )(req, res, next);
     },
-    bearer : (req, res, next) => {
+    /**
+     * Middleware: Autenticação de bearer token
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    bearer (req, res, next) {
         passport.authenticate(
             'bearer',
             {session:false},
@@ -64,5 +102,26 @@ module.exports = {
                 return next();
             }
         )(req, res, next);
+    },
+    /**
+     * Middleaware: Autenticação do refresh token
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     * @returns 
+     */
+    async refresh(req, res, next){
+        try {
+            const { refreshToken } = req.body; 
+            const id = await verificaRefreshToken(refreshToken);
+            await invalidaRefreshToken(refreshToken);
+            req.user = await Usuario.buscaPorId(id);
+            return next();            
+        } catch (error) {
+            if(error.name === 'InvalidArgumentError') {
+                res.status(401).json({erro : error.message});
+            }
+            return res.status(500).json({erro: error.message});
+        }
     }
 };

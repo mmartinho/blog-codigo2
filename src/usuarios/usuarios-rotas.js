@@ -1,7 +1,14 @@
 const usuariosControlador = require('./usuarios-controlador');
 const middlewaresAutenticacao = require('./middlewares-autenticacao');
+const { refresh } = require('./middlewares-autenticacao');
 
 module.exports = app => {
+  app.route('/usuario/atualiza_token')
+    .post(
+      middlewaresAutenticacao.refresh, 
+      usuariosControlador.login
+    );
+
   app.route('/usuario/login')
     .post(
         /**
@@ -19,8 +26,16 @@ module.exports = app => {
     );
     
   app.route('/usuario/logout')
-    .get(
-      middlewaresAutenticacao.bearer,
+    /**
+     * Alterado de "get" para "post" para permitir inserir dados no corpo
+     * .get( */
+    .post(
+      /** 
+       * Colocamos dois middlewares no mesmo argumento:
+       * executa primeiro o "refresh", depois o "bearer", 
+       * pra depois chamar o controlador 
+       **/
+      [middlewaresAutenticacao.refresh, middlewaresAutenticacao.bearer],
       usuariosControlador.logout
     );
 

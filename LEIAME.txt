@@ -11,12 +11,48 @@ Capítulo 01: autenticação com refresh tokens
 1. Alteramos a sintaxe de "arrow function" para função js tradicional em:
         @see src\usuarios\usuarios-controlador.js
         @see src\usuarios\usuarios-dao.js
+        @see src\posts\posts-controlador.js
+        @see src\posts\posts-dao.js
+        @see redis\manipula-blocklist.js
 2. Promissificamos as funções do DAO em:
         @see src\usuarios\usuarios-dao.js
+        @see src\posts\posts-dao.js
 3. Acrescentamos a nova função opaqueToken() para de geração do refreshToken:
         @see src\usuarios\usuarios-controlador.js
    ...utilizando-a no controlador de login do usuário
 4. Instalamos a lib "moment" para lidar com a expiração do refreshToken:
         >npm install moment@2.26.0
-   ...utilizando-a na funçao criarTokenOpaco():
+   ...utilizando-a na funçao "criarTokenOpaco()":
         @see src\usuarios\usuarios-controlador.js
+
+Capítulo 02: Implementando refresh tokens
+#refreshToken
+
+1. Criamos um manipulador genérico assíncrono (promissefied) de lista do redis:
+        @see redis\manipula-lista.js
+2. Criamos a allowList refresh token baseada no manipulador genérico criado anteriormente:
+        @see redis\allowlist-refresh-token.js
+3. No controlador de usuários, inserimos na função "criaTokenOpaco()" a operação para adicionar a entrada na allowList
+        @see src\usuarios\usuarios-controlador.js
+4. Ainda no controlador de usuários, utilizamos a função "criarTokenOpaco()" no método de "login()"
+        @see src\usuarios\usuarios-controlador.js
+5. Refatoramos o manipula blocklist para utilizar o manipulador genérico assíncrono do redis criado no "item 1"
+        @see redis\blocklist-access-token.js (antigo redis\manipula-blocklist.js)
+   ...incluindo as especificações redis da lista, não sendo mais necessário um arquivo separado para isso, 
+   permitindo a sua exclusão. Também renomeamos o arquivo "manipula-blocklist.js" para "blocklist-access-token.js",
+   mantendo o mesmo padrão do "allowlist-refresh-token.js". Obviamente, tivemos que atualizar as declarações "require"
+   de 3 arquivos a app: 
+        @see server.js
+        @see src\usuarios\estrategias-autenticacao.js 
+        @see src\usuarios\usuarios-controlador.js
+6. Adicionamos um novo middleare de refresh token em:
+        @see src\usuarios\middlewares-autenticacao.js
+7. Adicionamos uma nova rota para atualizar o refresh token em:
+        @see src\usuarios\usuarios-rotas.js
+8. Alteramos a rota de logout adicionando 2 middlewares: o "refresh" e o "bearer":
+        @see src\usuarios\usuarios-rotas.js
+   Dessa forma, conseguimos invalidar tanto o refresh, quanto o access token, efetivando o logout.
+
+Capítulo 03: 
+
+1. 

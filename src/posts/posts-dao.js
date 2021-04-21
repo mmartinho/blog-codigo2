@@ -1,36 +1,41 @@
 const db = require('../../database');
+const { InternalServerError } = require('../erros');
+
+/**
+ * Promissificando os comandos do DAO
+ */
+const { promisify } = require('util');
+const dbRun = promisify(db.run).bind(db);
+const dbAll = promisify(db.all).bind(db);
 
 module.exports = {
-  adiciona: post => {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `
-        INSERT INTO posts (
+  /**
+   * @param {*} post 
+   */
+  async adiciona(post) {
+    try {
+      await dbRun(
+        `INSERT INTO posts (
           titulo, 
           conteudo
-        ) VALUES (?, ?)
-      `,
-        [post.titulo, post.conteudo],
-        erro => {
-          if (erro) {
-            return reject('Erro ao adicionar o post!');
-          }
-
-          return resolve();
-        }
+        ) VALUES (?, ?)`,
+        [post.titulo, post.conteudo]
       );
-    });
+    } catch (error) {
+      throw new InternalServerError('Erro ao adicionar o post!');  
+    }
   },
 
-  lista: () => {
-    return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM posts`, (erro, resultados) => {
-        if (erro) {
-          return reject('Erro ao listar os posts!');
-        }
-
-        return resolve(resultados);
-      });
-    });
+  /**
+   * @returns 
+   */
+  async lista() {
+    try {
+      return await dbAll(
+        `SELECT * FROM posts`
+      );
+    } catch (error) {
+      throw new InternalServerError('Erro ao listar os posts!');  
+    }
   }
 };
