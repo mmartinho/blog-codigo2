@@ -53,6 +53,14 @@ Capítulo 02: Implementando refresh tokens
         @see src\usuarios\usuarios-rotas.js
    Dessa forma, conseguimos invalidar tanto o refresh, quanto o access token, efetivando o logout.
 
-Capítulo 03: 
+Capítulo 03: Modularizando os tokens
+
+1. Criamos um novo módulo para encapsular todas as funcionalidades dos tokens em um só módulo:
+        @see src\usuarios\tokens.js
+2. Trouxemos todo os métodos de criação de refresh e access tokens para o novo módulo.
+3. Trouxemos todos os método de verificação de refresh e access tokens para o novo módulo.
+4. Touxemos todos os métodos de invalidação de refresh e access tokens para o novo módulo.
+
+Capítulo 04: Verificação de e-mails
 
 1. 

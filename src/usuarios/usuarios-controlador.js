@@ -1,35 +1,7 @@
-const jwt = require('jsonwebtoken');
-const cripto = require('crypto');
-const moment = require('moment');
-
-const blocklist = require('../../redis/blocklist-access-token');
-const allowlistRefreshToken = require('../../redis/allowlist-refresh-token');
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 
-
-/**
- * @param {*} usuario 
- * @returns 
- */
-function criaTokenJWT(usuario) {
-  const payload = {
-    id: usuario.id
-  };
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
-}
-
-/**
- * @param {*} usuario
- * @returns 
- */
-async function criaTokenOpaco(usuario) {
-  const tokenOpaco = cripto.randomBytes(24).toString('hex');
-  const dataExpiracao = moment().add(5, 'd').unix(); // 5 dias
-  await allowlistRefreshToken.adiciona(tokenOpaco, usuario.id, dataExpiracao);
-  return tokenOpaco;
-}
+const tokens = require('./tokens');
 
 module.exports = {
   /**
@@ -62,35 +34,6 @@ module.exports = {
    * @param {*} req 
    * @param {*} res 
    */
-  async login(req, res) {
-    try {
-      const accessToken = criaTokenJWT(req.user);
-      const refreshToken = await criaTokenOpaco(req.user);
-      res.set('Authorization', accessToken);
-      res.status(200).json({ refreshToken });        
-    } catch (erro) {
-      res.status(500).json({ erro : erro.message});
-    }
-  },
-
-  /**
-   * @param {*} req 
-   * @param {*} res 
-   */
-  async logout(req, res) {
-    try {
-      const token = req.token;
-      await blocklist.adiciona(token);
-      res.status(204).send();      
-    } catch (erro) {
-      res.status(500).send({erro : erro.message});
-    }
-  },
-
-  /**
-   * @param {*} req 
-   * @param {*} res 
-   */
   async lista(req, res) {
     const usuarios = await Usuario.lista();
     res.json(usuarios);
@@ -107,6 +50,35 @@ module.exports = {
       res.status(200).send();
     } catch (erro) {
       res.status(500).json({ erro: erro });
+    }
+  },
+  
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
+   async login(req, res) {
+    try {
+      const accessToken = tokens.access.cria(req.user.id);
+      const refreshToken = await tokens.refresh.cria(req.user.id);
+      res.set('Authorization', accessToken);
+      res.status(200).json({ refreshToken });        
+    } catch (erro) {
+      res.status(500).json({ erro : erro.message});
+    }
+  },
+
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
+  async logout(req, res) {
+    try {
+      const token = req.token;
+      await tokens.access.invalida(token);
+      res.status(204).send();      
+    } catch (erro) {
+      res.status(500).send({erro : erro.message});
     }
   }
 };

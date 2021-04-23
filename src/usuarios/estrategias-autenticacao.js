@@ -2,12 +2,10 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const BearerStrategy = require('passport-http-bearer').Strategy;
-const jwt = require('jsonwebtoken');
 
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
-const blocklist = require('../../redis/blocklist-access-token');
-
+const tokens = require('./tokens');
 
 /**
  * @param {*} usuario 
@@ -26,17 +24,6 @@ async function verificaSenha(senha, senhaHash) {
     const senhaValida = await bcrypt.compare(senha, senhaHash);
     if(!senhaValida) {
         throw new InvalidArgumentError('E-mail ou senha inválidos');
-    }
-}
-
-/**
- * Verica se o token já está na lista de descartados
- * @param {*} token 
- */
-async function verificaTokenNablocklist(token) {
-    const tokenNablocklist = await blocklist.contemToken(token);
-    if(tokenNablocklist) {
-        throw new jwt.JsonWebTokenError('Token inválido por logout');
     }
 }
 
@@ -67,9 +54,8 @@ passport.use(new LocalStrategy({
 passport.use(new BearerStrategy(
     async (token, done) => {
         try {
-            await verificaTokenNablocklist(token);
-            const payload = jwt.verify(token, process.env.CHAVE_JWT);
-            const usuario = await Usuario.buscaPorId(payload.id);
+            const id = await tokens.access.verifica(token);
+            const usuario = await Usuario.buscaPorId(id);
             /** repassa o usuário e o token pra pro próximo middleware */
             done(null, usuario, { token : token });                 
         } catch (error) {
