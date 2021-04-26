@@ -62,5 +62,15 @@ Capítulo 03: Modularizando os tokens
 4. Touxemos todos os métodos de invalidação de refresh e access tokens para o novo módulo.
 
 Capítulo 04: Verificação de e-mails
+#nodemailer
 
-1. 
+1. Instalamos o pacote do nodemailer para envio de emails:
+        >npm install nodemailer@6.4.8
+2. Criamos o módulo de email:
+        @see src\usuarios\emails.js
+   ...com duas classes, uma generalização e uma especificação de email de verificação
+3. No usuário controlador, acrescentamos na função de "adiciona" novo usuário a instancia da nova classe, 
+   passando no construtor o usuário e um endereço de verificação:
+        @see src\usuarios\usuarios-controlador.js
+   ...dessa forma, ao criar o usuário, uma mensagem é enviada para o endereço de e-mail informado.
+

@@ -18,7 +18,10 @@ class Usuario {
       throw new InvalidArgumentError('O usuário já existe!');
     }
 
-    return usuariosDao.adiciona(this);
+    await usuariosDao.adiciona(this);
+    const { id } = await usuariosDao.buscaPorEmail(this.email);
+    this.id = id;
+    return this;
   }
 
   /**

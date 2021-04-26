@@ -2,6 +2,17 @@ const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 
 const tokens = require('./tokens');
+const { EmailVerificacao } = require('./emails');
+
+/**
+ * @param {*} rota 
+ * @param {*} id 
+ * @returns 
+ */
+function geraEndereco(rota, id) {
+  const baseUrl = process.env.BASE_URL;
+  return `${baseUrl}${rota}/${id}`;
+}
 
 module.exports = {
   /**
@@ -18,6 +29,18 @@ module.exports = {
       });
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
+
+      /**
+       * Endereço de verificação
+       */
+      const endereco = geraEndereco('/usuario/verifica_email', usuario.id);
+      const emailVerificacao = new EmailVerificacao(usuario, endereco); 
+      /** 
+       * Enviando assíncronamente a mensagem 
+       * de email (sem o await) 
+       */
+      emailVerificacao.enviaEmail(usuario).catch(console.log);
+      
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
