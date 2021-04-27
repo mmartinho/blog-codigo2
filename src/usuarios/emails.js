@@ -1,5 +1,23 @@
 const nodemailer = require('nodemailer');
 
+const configuracaoEmailTeste = (contaTeste) => {
+    return { 
+        host: 'smtp.ethereal.email', 
+        auth: contaTeste
+    }
+};
+
+const configuracaoEmailProducao = () => {
+    return {
+        host : process.env.EMAIL_HOST,
+        auth: {
+            user: process.env.EMAIL_USUARIO,
+            pass: process.env.EMAIL_SENHA
+        },
+        secure: true
+    }
+}
+
 class Email {
     from='';
     to='';
@@ -7,14 +25,28 @@ class Email {
     text='';
     html='';    
 
+    /**
+     * 
+     */
+    async criaConfiguracaoEmail() {
+        if(process.env.NODE_ENV === 'production') {
+            return configuracaoEmailProducao();
+        } else {
+            const contaTeste = await nodemailer.createTestAccount();
+            return configuracaoEmailTeste(contaTeste);
+        }
+    }
+
+    /**
+     * 
+     */
     async enviaEmail() {
-        const contaTeste = await nodemailer.createTestAccount();
-        const transportador = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            auth: contaTeste
-        }); 
+        const configuracaoEmail = await this.criaConfiguracaoEmail();
+        const transportador = nodemailer.createTransport(configuracaoEmail); 
         const info = await transportador.sendMail(this);   
-        console.log('URL: '+nodemailer.getTestMessageUrl(info));
+        if(process.env.NODE_ENV !== 'production')  {
+            console.log('URL: '+nodemailer.getTestMessageUrl(info));
+        }
     }    
 }
 

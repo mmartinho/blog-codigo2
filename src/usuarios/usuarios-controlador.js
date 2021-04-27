@@ -6,12 +6,12 @@ const { EmailVerificacao } = require('./emails');
 
 /**
  * @param {*} rota 
- * @param {*} id 
+ * @param {*} token 
  * @returns 
  */
-function geraEndereco(rota, id) {
+function geraEndereco(rota, token) {
   const baseUrl = process.env.BASE_URL;
-  return `${baseUrl}${rota}/${id}`;
+  return `${baseUrl}${rota}/${token}`;
 }
 
 module.exports = {
@@ -21,11 +21,11 @@ module.exports = {
    */
   async adiciona (req, res) {
     const { nome, email, senha } = req.body;
-
     try {
       const usuario = new Usuario({
         nome,
-        email
+        email,
+        emailVerificado : false
       });
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
@@ -33,8 +33,10 @@ module.exports = {
       /**
        * Endereço de verificação
        */
-      const endereco = geraEndereco('/usuario/verifica_email', usuario.id);
+      const token = tokens.verificacaoEmail.cria(usuario.id);
+      const endereco = geraEndereco('/usuario/verifica_email', token);
       const emailVerificacao = new EmailVerificacao(usuario, endereco); 
+
       /** 
        * Enviando assíncronamente a mensagem 
        * de email (sem o await) 
@@ -102,6 +104,20 @@ module.exports = {
       res.status(204).send();      
     } catch (erro) {
       res.status(500).send({erro : erro.message});
+    }
+  },
+
+  /**
+   * @param {*} req 
+   * @param {*} res 
+   */
+  async verificaEmail(req, res) {
+    try {
+      const usuario = await req.user;
+      await usuario.verificaEmail();
+      res.status(200).json();
+    } catch (error) {
+      res.status(500).json({erro : error.message});
     }
   }
 };

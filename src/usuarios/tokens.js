@@ -93,6 +93,10 @@ async function verificaTokenJWT(token, nome, blocklist) {
  * @param {*} blocklist 
  */
 async function verificaTokenNablocklist(token, nome, blocklist) {
+    /** Blocklist vazia */
+    if(!blocklist) {
+        return;
+    }
     const tokenNablocklist = await blocklist.contemToken(token);
     if(tokenNablocklist) {
         throw new jwt.JsonWebTokenError(`${nome} inválido por logout`);
@@ -108,6 +112,9 @@ function invalidaTokenJWT(token, blocklist) {
     return blocklist.adiciona(token);
 }
 
+/**
+ * Todos os objetos "Token" utilizados na app
+ */
 module.exports = {
     access: {
         nome: 'Access token',
@@ -136,5 +143,16 @@ module.exports = {
         invalida(token) {
             return invalidaTokenOpaco(token, this.lista);
         }        
+    },
+    verificacaoEmail: {
+        nome: 'Token de verificaçao de e-mail',
+        lista: blocklistAccessToken,
+        expiracao: [1, 'h'],
+        cria(id) {
+            return criaTokenJWT(id, this.expiracao);
+        },
+        verifica(token) {
+            return verificaTokenJWT(token, this.nome);
+        }       
     }
 }

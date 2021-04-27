@@ -4,20 +4,26 @@ const validacoes = require('../validacoes-comuns');
 const bcrypt = require('bcrypt');
 
 class Usuario {
+  /**
+   * @param {*} usuario 
+   */
   constructor(usuario) {
     this.id = usuario.id;
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senha = usuario.senhaHash;
-
+    this.emailVerificado = usuario.emailVerificado;
     this.valida();
   }
 
+  /**
+   * @returns 
+   * @throws Exception
+   */
   async adiciona() {
     if (await Usuario.buscaPorEmail(this.email)) {
       throw new InvalidArgumentError('O usuário já existe!');
     }
-
     await usuariosDao.adiciona(this);
     const { id } = await usuariosDao.buscaPorEmail(this.email);
     this.id = id;
@@ -35,16 +41,34 @@ class Usuario {
     this.senhaHash = await Usuario.gerarSenhaHash(senha);
   }
 
+  /**
+   * 
+   */
   valida() {
     validacoes.campoStringNaoNulo(this.nome, 'nome');
     validacoes.campoStringNaoNulo(this.email, 'email');
   }
 
-  
+  /**
+   * Altera o estado de verificação do e-mail
+   * do usuário
+   */
+  async verificaEmail() {
+    this.emailVerificado = true;
+    await usuariosDao.modificaEmailVerificado(this, this.emailVerificado);
+  }
+
+  /**
+   * @returns 
+   */
   async deleta() {
     return usuariosDao.deleta(this);
   }
   
+  /**
+   * @param {*} id 
+   * @returns 
+   */
   static async buscaPorId(id) {
     const usuario = await usuariosDao.buscaPorId(id);
     if (!usuario) {
@@ -54,6 +78,10 @@ class Usuario {
     return new Usuario(usuario);
   }
   
+  /**
+   * @param {*} email 
+   * @returns 
+   */
   static async buscaPorEmail(email) {
     const usuario = await usuariosDao.buscaPorEmail(email);
     if (!usuario) {
@@ -63,6 +91,9 @@ class Usuario {
     return new Usuario(usuario);
   }
 
+  /**
+   * @returns 
+   */
   static lista() {
     return usuariosDao.lista();
   }

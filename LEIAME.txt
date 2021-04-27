@@ -74,3 +74,37 @@ Capítulo 04: Verificação de e-mails
         @see src\usuarios\usuarios-controlador.js
    ...dessa forma, ao criar o usuário, uma mensagem é enviada para o endereço de e-mail informado.
 
+Capítulo 05: Verificando os endereços
+
+1. Inserimos um novo campo na tabela de usuários para guardar o estado da verificação do email:
+        @see database.js
+2. Alteramos o metodo adiciona do módulo usuários DAO para incluir mais esse atributo novo:
+        @see src\usuarios\usuarios-dao.js
+3. Alteramos o método construtor da classe modelo de usuário para inbluir mais esse atributo:
+        @see src\usuarios\usuarios-modelo.js
+4. Alteramos o controlador para adicionar novo usuário para iniciar o "emailVerificado" como false:
+        @see src\usuarios\usuarios-controlador.js
+5. Excluímos a base de dados "db.sqlite", para que o sistema possa criar uma nova base de dados, já incluindo
+   o novo atributo
+6. Acrescentamos um novo método para atualizar o estado da verificação do email do usuário ao módulo usuarios-dao:
+        @see src\usuarios\usuarios-dao.js
+7. Acrescentamos um novo método no modelo de usuparios para chamar a função dao criada anteriormente:
+        @see src\usuarios\usuarios-modelo.js
+8. Acrescentamos a rota de verificação de email nas rotas de usuarios:
+        @see src\usuarios\usuarios-rotas.js
+9. Acrescentamos uma função de verificação de rota no controlador de usuários:
+        @see src\usuarios\usuarios-controlador.js
+10. Acrescentamos mais um objeto de token com dois métodos que realizam a criação e a verificação do token jwt específico
+    para a verificação do email:
+        @see src\usuarios\tokens.js
+11. No controlador adiciona usuário, substituimos o id do usuario pelo resultado da criação de do token de verificação de email:
+        @see src\usuarios\usuarios-controlador.js
+12. Na rota de verificação de email, trocamos o param id por token:
+        @see src\usuarios\usuarios-rotas.js
+13. No middleware de verificação de email, chamamos a verificação do token jwt, o qual retorna o id do usuário, que por sua vez
+    é passando para o modelo realizar a busca deste, inserindo-o na requisição:
+        @see src\usuarios\middlewares-autenticacao.js
+14. Alteramos as configurações de email para pemitir envio pelo servidor de produção:
+        @see src\usuarios\emails.js
+
+
